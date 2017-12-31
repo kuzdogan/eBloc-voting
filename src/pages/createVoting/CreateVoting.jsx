@@ -3,6 +3,7 @@ import {Button, Form, FormGroup, FormControl, ControlLabel, Glyphicon, Grid, Row
 import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import Datetime from 'react-datetime'
+import moment from 'moment'
 import 'react-datetime/css/react-datetime.css'
 
 class CreateVoting extends Component{
@@ -13,7 +14,9 @@ class CreateVoting extends Component{
       web3: null,
       owner: null,
       voters: [{ address: ''}],
-      candidates: [{ address: ''}],
+      candidates: [{ name: ''}],
+      startDate: 0,
+      endDate: 0,
       smartVotingInstance: null
     }
     this.instantiateContract = this.instantiateContract.bind(this);
@@ -74,17 +77,32 @@ class CreateVoting extends Component{
   handleCandidateChange = (idx) => (evt) =>{
   	const newCandidates = this.state.candidates.map((candidate, sidx) => {
       if (idx !== sidx) return candidate;
-      return { ...candidate, address: evt.target.value };
+      return { ...candidate, name: evt.target.value };
     });
     this.setState({ candidates: newCandidates });
   }
   handleAddCandidate = () => {
-    this.setState({ candidates: this.state.candidates.concat([{ address: '' }]) });
+    this.setState({ candidates: this.state.candidates.concat([{ name: '' }]) });
   }
   handleRemoveCandidate = (idx) => () => {
     this.setState({ candidates: this.state.candidates.filter((v, sidx) => idx !== sidx) });
   }  
 
+  // Handle Dates
+  handleStartDateChange = (moment) => {
+  	this.setState({ startDate : moment.seconds(0).format('X')})
+  }
+  handleEndDateChange = (moment) => {
+  	this.setState({ endDate : moment.seconds(0).format('X')})
+  }
+  isValidStartDate = (current) => {
+  	var yesterday = Datetime.moment().subtract( 1, 'day' );
+  	return current.isAfter( yesterday );
+  }
+  isValidEnd = (current) => {
+  	var start = this.state.startDate;
+  	return current.isAfter(moment.unix(start).subtract( 1, 'day' ));
+  }
 	render(){
 		return(
 		<div className="page">
@@ -116,7 +134,7 @@ class CreateVoting extends Component{
 	        </FormGroup>
 	        <FormGroup>
 						<Row>
-							<p> Enter candidate addresses </p>	
+							<p> Enter candidate names </p>	
 						</Row>
 
 						{this.state.candidates.map((candidate, idx) => (
@@ -124,8 +142,8 @@ class CreateVoting extends Component{
 		          	<Col md={6}>
 			            <FormControl
 			              type="text"
-			              placeholder={`Candidate #${idx + 1} address`}
-			              value={candidate.address}
+			              placeholder={`Candidate #${idx + 1} Name`}
+			              value={candidate.name}
 			              onChange={this.handleCandidateChange(idx)}
 			            />
 			          </Col>
@@ -144,7 +162,12 @@ class CreateVoting extends Component{
 	        	</Row>
 	        	<Row>      
 		        	<Col md={6}>
-								<Datetime defaultValue={new Date()}/>
+								<Datetime 
+								defaultValue={new Date()}
+								onChange={this.handleStartDateChange}
+								dateFormat="D MMMM YYYY"
+								isValidDate={this.isValidStartDate}
+								/>
 		        	</Col>
 						</Row>
 		        <Row>
@@ -152,7 +175,13 @@ class CreateVoting extends Component{
 	        	</Row>
 	        	<Row>      
 		        	<Col md={6}>
-								<Datetime defaultValue={new Date()}/>
+								<Datetime 
+								id="end-date"
+								defaultValue={new Date()}
+								onChange={this.handleEndDateChange}
+								dateFormat="D MMMM YYYY"
+								isValidDate={this.isValidEnd}
+								/>
 		        	</Col>
 						</Row>
 						<Button bsStyle="primary" onClick={this.instantiateContract}>
@@ -171,9 +200,13 @@ class CreateVoting extends Component{
 					<h2> Candidates are</h2>
 						{this.state.candidates.map((candidate, idx) => (
 		          <Row className="candidate-{idx}">
-		          	<p> Candidate {idx}: {candidate.address} </p>
+		          	<p> Candidate {idx}: {candidate.name} </p>
 		          </Row>
 		        ))}
+		      <h2> Start Date is </h2>
+		      	<Row> {this.state.startDate} </Row>
+		      <h2> End Date is </h2>
+		      	<Row> {this.state.endDate} </Row>
 				</div>
 			</Grid>
 		</div>
