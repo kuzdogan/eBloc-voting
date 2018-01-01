@@ -5,6 +5,8 @@ import getWeb3 from '../../utils/getWeb3'
 import Datetime from 'react-datetime'
 import moment from 'moment'
 import 'react-datetime/css/react-datetime.css'
+import qr from 'qr-image'
+import jspdf from 'jspdf'
 var ethKeys = require("ethereumjs-keys");
 
 class CreateVoting extends Component{
@@ -13,9 +15,10 @@ class CreateVoting extends Component{
 
     this.state = {
       web3: null,
-      voters: [{ address: ''}],
+      voterKeys: [],
+      voterAddresses: [],
       voterCount: 0,
-      candidates: [{ name: ''}],
+      candidates: [],
       startDate: 0,
       endDate: 0,
       smartVotingInstance: null
@@ -32,15 +35,17 @@ class CreateVoting extends Component{
     .then(results => {
       this.setState({
         web3: results.web3,
+      },function(){
+				this.instantiateContract();		 	
       })
     })
     .catch(() => {
       console.log('Error finding web3.')
     })
+
   }
 
   componentDidMount(){
-  	this.instantiateContract();		 	
   }
 
   instantiateContract() {
@@ -62,7 +67,15 @@ class CreateVoting extends Component{
 	    	console.log(accounts);
 	    })
 	  }
+	  else {
+	  	console.log("NO WEB3");
+	  }
   }
+
+  createVoting = () => {
+		this.generateKeys();
+
+	}
 
 	generateKeys = () => {
 		// User-specified password 
@@ -71,20 +84,58 @@ class CreateVoting extends Component{
 		var kdf = "pbkdf2"; // "scrypt" to use the scrypt kdf 
 		// Generate private key and the salt and initialization vector to encrypt it
 		var keys = [];
+		var addresses = [];
 		for (var i=0; i < this.state.voterCount; i++){
-			keys.push(ethKeys.create());
-			console.log("Private key " + i + " " + keys[i].privateKey.toString('hex'));
+			var k = ethKeys.create();
+			keys.push(k);
+			addresses.push(k.privateKey.toString('hex'));
 		}
-		this.setState({ voters: keys });
+		this.setState({ voterKeys: keys });
+		this.setState({ voterAddresses: addresses }, function () {
+	    console.log(this.state.voterAddresses);
+			this.generateQRCodes();	    
+		});
+
 	}
+
+	generateQRCodes = () => {		
+		var QRs = [];
+		for(var i=0; i < this.state.voterCount; i++){
+			var temp = {
+				address: this.state.voterAddresses[i],
+				candidates: this.state.candidates
+			}
+			QRs.push( qr.imageSync(JSON.stringify(temp).toString('base64'), { type: 'png', margin: 8 }) );
+		}
+
+		var doc = new jspdf('p', 'mm', 'a4');
+		var posX = 0;
+		var posY = 0;
+		var size = 70; // Square codes, single size sufficient
+		var qrPerLine = 3;
+		var paperX = 210; // a4 dimensions
+		var paperY = 297;
+		for (var i = 0; i < this.state.voterCount; i++) {
+			doc.addImage(QRs[i], 'PNG', posX, posY, size , size);
+			posX += size;
+			if(posX >= paperX){ // Next line
+				posX = 0;
+				posY += size;
+			}	
+			if (posY >= paperY-size){ // Next page
+				doc.addPage();
+				posX = 0;
+				posY = 0;
+			}
+		}
+		doc.save("voters.pdf");
+	}
+
+
   // Voter Handlers
   handleVoterChange = (e) => {
     this.setState({ voterCount: e.target.value });
   }
-
-  createVoting = () => {
-		this.generateKeys();
-	}
 
   /*
   handleAddVoter = () => {
