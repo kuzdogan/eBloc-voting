@@ -6,6 +6,7 @@ import Datetime from 'react-datetime'
 import moment from 'moment'
 import lightwallet from 'eth-lightwallet'
 import 'react-datetime/css/react-datetime.css'
+var ethKeys = require("ethereumjs-keys");
 
 class CreateVoting extends Component{
 	constructor(props) {
@@ -62,12 +63,17 @@ class CreateVoting extends Component{
 	    	console.log(accounts);
 	    })
 	  } else
-	  console.log("NOT YET");
   }
 
   createVoting = () => {
-  	console.log("Creating Voting");
-  }
+		// User-specified password 
+		var password = "wheethereum";
+		// Key derivation function (default: PBKDF2) 
+		var kdf = "pbkdf2"; // "scrypt" to use the scrypt kdf 
+		// Generate private key and the salt and initialization vector to encrypt it 
+		var dk = ethKeys.create();
+		console.log(dk);
+	}
 
   // Voter Handlers
   handleVoterChange = (e) => {
