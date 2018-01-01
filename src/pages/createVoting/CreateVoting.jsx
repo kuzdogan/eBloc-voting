@@ -104,7 +104,8 @@ class CreateVoting extends Component{
 			var temp = {
 				address: this.state.voterAddresses[i],
 				candidates: this.state.candidates
-			}
+			}	
+			console.log(temp);
 			QRs.push( qr.imageSync(JSON.stringify(temp).toString('base64'), { type: 'png', margin: 8 }) );
 		}
 
@@ -116,7 +117,7 @@ class CreateVoting extends Component{
 		var paperX = 210; // a4 dimensions
 		var paperY = 297;
 		for (var i = 0; i < this.state.voterCount; i++) {
-			doc.addImage(QRs[i], 'PNG', posX, posY, size , size);
+			doc.addImage(QRs[i], 'PNG', posX, posY, size , size, "qr" + i);
 			posX += size;
 			if(posX >= paperX){ // Next line
 				posX = 0;
