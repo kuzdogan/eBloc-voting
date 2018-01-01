@@ -5,6 +5,9 @@ import getWeb3 from '../../utils/getWeb3'
 import Datetime from 'react-datetime'
 import moment from 'moment'
 import 'react-datetime/css/react-datetime.css'
+import qr from 'qr-image'
+import jspdf from 'jspdf'
+var ethKeys = require("ethereumjs-keys");
 
 class CreateVoting extends Component{
 	constructor(props) {
@@ -12,13 +15,16 @@ class CreateVoting extends Component{
 
     this.state = {
       web3: null,
-      owner: null,
-      voters: [{ address: ''}],
-      candidates: [{ name: ''}],
+      voterKeys: [],
+      voterAddresses: [],
+      voterCount: 0,
+      candidates: [],
       startDate: 0,
       endDate: 0,
       smartVotingInstance: null
     }
+    this.password = '';
+    this.createVoting = this.createVoting.bind(this);
     this.instantiateContract = this.instantiateContract.bind(this);
   }
 
@@ -29,11 +35,17 @@ class CreateVoting extends Component{
     .then(results => {
       this.setState({
         web3: results.web3,
+      },function(){
+				this.instantiateContract();		 	
       })
     })
     .catch(() => {
       console.log('Error finding web3.')
     })
+
+  }
+
+  componentDidMount(){
   }
 
   instantiateContract() {
@@ -46,33 +58,94 @@ class CreateVoting extends Component{
 
 	    smartVoting.deployed().then(instance => {
 	    	this.smartVotingInstance = instance;
-	    	return this.smartVotingInstance.owner()
-	    }).then(owner => { // Arrow function for using "this"
-	    	this.setState({owner: owner});
+	    	return this.smartVotingInstance.numberOfElections()
+	    }).then(numElections => { // Arrow function for using "this"
+	    	console.log("Number of elections so far is: " + numElections);
 	    })
 
 	    this.state.web3.eth.getAccounts((error, accounts) => {
 	    	console.log(accounts);
 	    })
-	  } else
-	  console.log("NOT YET");
+	  }
+	  else {
+	  	console.log("NO WEB3");
+	  }
   }
 
+  createVoting = () => {
+		this.generateKeys();
+
+	}
+
+	generateKeys = () => {
+		// User-specified password 
+		var password = "wheethereum";
+		// Key derivation function (default: PBKDF2) 
+		var kdf = "pbkdf2"; // "scrypt" to use the scrypt kdf 
+		// Generate private key and the salt and initialization vector to encrypt it
+		var keys = [];
+		var addresses = [];
+		for (var i=0; i < this.state.voterCount; i++){
+			var k = ethKeys.create();
+			keys.push(k);
+			addresses.push(k.privateKey.toString('hex'));
+		}
+		this.setState({ voterKeys: keys });
+		this.setState({ voterAddresses: addresses }, function () {
+	    console.log(this.state.voterAddresses);
+			this.generateQRCodes();	    
+		});
+
+	}
+
+	generateQRCodes = () => {		
+		var QRs = [];
+		for(var i=0; i < this.state.voterCount; i++){
+			var temp = {
+				address: this.state.voterAddresses[i],
+				candidates: this.state.candidates
+			}	
+			console.log(temp);
+			QRs.push( qr.imageSync(JSON.stringify(temp).toString('base64'), { type: 'png', margin: 8 }) );
+		}
+
+		var doc = new jspdf('p', 'mm', 'a4');
+		var posX = 0;
+		var posY = 0;
+		var size = 70; // Square codes, single size sufficient
+		var qrPerLine = 3;
+		var paperX = 210; // a4 dimensions
+		var paperY = 297;
+		for (var i = 0; i < this.state.voterCount; i++) {
+			doc.addImage(QRs[i], 'PNG', posX, posY, size , size, "qr" + i);
+			posX += size;
+			if(posX >= paperX){ // Next line
+				posX = 0;
+				posY += size;
+			}	
+			if (posY >= paperY-size){ // Next page
+				doc.addPage();
+				posX = 0;
+				posY = 0;
+			}
+		}
+		doc.save("voters.pdf");
+	}
+
+
   // Voter Handlers
-  handleVoterChange = (idx) => (evt) =>{
-  	const newVoters = this.state.voters.map((voter, sidx) => {
-      if (idx !== sidx) return voter;
-      return { ...voter, address: evt.target.value };
-    });
-    this.setState({ voters: newVoters });
+  handleVoterChange = (e) => {
+    this.setState({ voterCount: e.target.value });
   }
+
+  /*
   handleAddVoter = () => {
     this.setState({ voters: this.state.voters.concat([{ address: '' }]) });
   }
   handleRemoveVoter = (idx) => () => {
     this.setState({ voters: this.state.voters.filter((v, sidx) => idx !== sidx) });
   }  
-
+	*/
   // Candidate Handlers
   handleCandidateChange = (idx) => (evt) =>{
   	const newCandidates = this.state.candidates.map((candidate, sidx) => {
@@ -111,9 +184,20 @@ class CreateVoting extends Component{
 				<Form>
 					<FormGroup>
 						<Row>
-							<p> Enter voter addresses </p>	
+							<p> Enter Number of Voters </p>	
 						</Row>
-						{this.state.voters.map((voter, idx) => (
+						<Row>
+							<Col md={6}>
+								<FormControl
+									id="voter-count"
+									type="text"
+									placeholder="Number of voters"
+									value={this.state.voterCount}
+									onChange={this.handleVoterChange}
+								/>
+							</Col>
+						</Row>
+						{/*this.state.voters.map((voter, idx) => (
 		          <Row className="voter-input">
 		          	<Col md={6}>
 			            <FormControl
@@ -129,8 +213,8 @@ class CreateVoting extends Component{
 		            	</Button>
 	            	</Col>
 		          </Row>
-		        ))}
-	        	<Button bsStyle="primary" onClick={this.handleAddVoter}>Add Voter</Button>
+		        ))
+	        	<Button bsStyle="primary" onClick={this.handleAddVoter}>Add Voter</Button>*/}
 	        </FormGroup>
 	        <FormGroup>
 						<Row>
@@ -138,7 +222,7 @@ class CreateVoting extends Component{
 						</Row>
 
 						{this.state.candidates.map((candidate, idx) => (
-		          <Row className="voter-input">
+		          <Row className="candidate-input">
 		          	<Col md={6}>
 			            <FormControl
 			              type="text"
@@ -184,19 +268,16 @@ class CreateVoting extends Component{
 								/>
 		        	</Col>
 						</Row>
-						<Button bsStyle="primary" onClick={this.instantiateContract}>
+						<Button bsStyle="primary" onClick={this.createVoting}>
 						Create a voting
 						</Button>
 					</FormGroup>
 				</Form>
 				<div className="contract-info">
-					<p> Owner of the contract is: {this.state.owner} </p>
-					<h2> Voters are</h2>
-						{this.state.voters.map((voter, idx) => (
-		          <Row className="voter-{idx}">
-		          	<p> Voter {idx}: {voter.address} </p>
+					<h2> Voter Number is</h2>
+		          <Row className="voter-count">
+		          	<p> Voter Count: {this.state.voterCount} </p>
 		          </Row>
-		        ))}
 					<h2> Candidates are</h2>
 						{this.state.candidates.map((candidate, idx) => (
 		          <Row className="candidate-{idx}">
