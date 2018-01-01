@@ -4,6 +4,7 @@ import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import Datetime from 'react-datetime'
 import moment from 'moment'
+import lightwallet from 'eth-lightwallet'
 import 'react-datetime/css/react-datetime.css'
 
 class CreateVoting extends Component{
@@ -12,13 +13,15 @@ class CreateVoting extends Component{
 
     this.state = {
       web3: null,
-      owner: null,
       voters: [{ address: ''}],
+      voterCount: 0,
       candidates: [{ name: ''}],
       startDate: 0,
       endDate: 0,
       smartVotingInstance: null
     }
+    this.password = '';
+    this.createVoting = this.createVoting.bind(this);
     this.instantiateContract = this.instantiateContract.bind(this);
   }
 
@@ -36,6 +39,10 @@ class CreateVoting extends Component{
     })
   }
 
+  componentDidMount(){
+  	this.instantiateContract();		 	
+  }
+
   instantiateContract() {
   	if(this.state.web3){
 	    const contract = require('truffle-contract')
@@ -46,9 +53,9 @@ class CreateVoting extends Component{
 
 	    smartVoting.deployed().then(instance => {
 	    	this.smartVotingInstance = instance;
-	    	return this.smartVotingInstance.owner()
-	    }).then(owner => { // Arrow function for using "this"
-	    	this.setState({owner: owner});
+	    	return this.smartVotingInstance.numberOfElections()
+	    }).then(numElections => { // Arrow function for using "this"
+	    	console.log("Number of elections so far is: " + numElections);
 	    })
 
 	    this.state.web3.eth.getAccounts((error, accounts) => {
@@ -58,21 +65,22 @@ class CreateVoting extends Component{
 	  console.log("NOT YET");
   }
 
-  // Voter Handlers
-  handleVoterChange = (idx) => (evt) =>{
-  	const newVoters = this.state.voters.map((voter, sidx) => {
-      if (idx !== sidx) return voter;
-      return { ...voter, address: evt.target.value };
-    });
-    this.setState({ voters: newVoters });
+  createVoting = () => {
+  	console.log("Creating Voting");
   }
+
+  // Voter Handlers
+  handleVoterChange = (e) => {
+    this.setState({ voterCount: e.target.value });
+  }
+  /*
   handleAddVoter = () => {
     this.setState({ voters: this.state.voters.concat([{ address: '' }]) });
   }
   handleRemoveVoter = (idx) => () => {
     this.setState({ voters: this.state.voters.filter((v, sidx) => idx !== sidx) });
   }  
-
+	*/
   // Candidate Handlers
   handleCandidateChange = (idx) => (evt) =>{
   	const newCandidates = this.state.candidates.map((candidate, sidx) => {
@@ -111,9 +119,20 @@ class CreateVoting extends Component{
 				<Form>
 					<FormGroup>
 						<Row>
-							<p> Enter voter addresses </p>	
+							<p> Enter Number of Voters </p>	
 						</Row>
-						{this.state.voters.map((voter, idx) => (
+						<Row>
+							<Col md={6}>
+								<FormControl
+									id="voter-count"
+									type="text"
+									placeholder="Number of voters"
+									value={this.state.voterCount}
+									onChange={this.handleVoterChange}
+								/>
+							</Col>
+						</Row>
+						{/*this.state.voters.map((voter, idx) => (
 		          <Row className="voter-input">
 		          	<Col md={6}>
 			            <FormControl
@@ -129,8 +148,8 @@ class CreateVoting extends Component{
 		            	</Button>
 	            	</Col>
 		          </Row>
-		        ))}
-	        	<Button bsStyle="primary" onClick={this.handleAddVoter}>Add Voter</Button>
+		        ))
+	        	<Button bsStyle="primary" onClick={this.handleAddVoter}>Add Voter</Button>*/}
 	        </FormGroup>
 	        <FormGroup>
 						<Row>
@@ -138,7 +157,7 @@ class CreateVoting extends Component{
 						</Row>
 
 						{this.state.candidates.map((candidate, idx) => (
-		          <Row className="voter-input">
+		          <Row className="candidate-input">
 		          	<Col md={6}>
 			            <FormControl
 			              type="text"
@@ -184,19 +203,16 @@ class CreateVoting extends Component{
 								/>
 		        	</Col>
 						</Row>
-						<Button bsStyle="primary" onClick={this.instantiateContract}>
+						<Button bsStyle="primary" onClick={this.createVoting}>
 						Create a voting
 						</Button>
 					</FormGroup>
 				</Form>
 				<div className="contract-info">
-					<p> Owner of the contract is: {this.state.owner} </p>
-					<h2> Voters are</h2>
-						{this.state.voters.map((voter, idx) => (
-		          <Row className="voter-{idx}">
-		          	<p> Voter {idx}: {voter.address} </p>
+					<h2> Voter Number is</h2>
+		          <Row className="voter-count">
+		          	<p> Voter Count: {this.state.voterCount} </p>
 		          </Row>
-		        ))}
 					<h2> Candidates are</h2>
 						{this.state.candidates.map((candidate, idx) => (
 		          <Row className="candidate-{idx}">
