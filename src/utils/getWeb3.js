@@ -5,7 +5,8 @@ let getWeb3 = new Promise(function(resolve, reject) {
   window.addEventListener('load', function() {
     var results
     var web3 = window.web3
-
+    const truffle = "http://127.0.0.1:9545"
+    const ebloc = "http://192.168.4.134:8545"
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
     if (typeof web3 !== 'undefined') {
       // Use Mist/MetaMask's provider.
@@ -21,8 +22,7 @@ let getWeb3 = new Promise(function(resolve, reject) {
     } else {
       // Fallback to localhost if no web3 injection. We've configured this to
       // use the development console's port by default.
-      var provider = new Web3.providers.HttpProvider('http://127.0.0.1:9545')
-
+      var provider = new Web3.providers.HttpProvider(truffle)
       web3 = new Web3(provider)
 
       results = {
