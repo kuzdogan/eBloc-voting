@@ -51,11 +51,15 @@
   "dependencies": {
     "bootstrap": "^3.3.7",
     "dotenv": "^2.0.0",
+    "eth-lightwallet": "3.0.0",
+    "ethereumjs-keys": "0.0.3",
+    "hooked-web3-provider": "1.0.0",
     "moment": "^2.20.1",
     "react": "^15.4.2",
-    "react-bootstrap": "^0.31.5",
+    "react-bootstrap": "0.31.5",
     "react-datetime": "^2.11.1",
     "react-dom": "^15.4.2",
+    "react-qr-reader": "2.0.1",
     "react-router-dom": "^4.2.2"
   },
   "scripts": {

@@ -72,4 +72,5 @@ contract SmartVoting {
       require(isActive(electionId) == false);
       return votesReceived[electionId][candidateName];
   }
+
 }
