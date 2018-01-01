@@ -4,7 +4,6 @@ import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import Datetime from 'react-datetime'
 import moment from 'moment'
-import lightwallet from 'eth-lightwallet'
 import 'react-datetime/css/react-datetime.css'
 var ethKeys = require("ethereumjs-keys");
 
@@ -62,23 +61,31 @@ class CreateVoting extends Component{
 	    this.state.web3.eth.getAccounts((error, accounts) => {
 	    	console.log(accounts);
 	    })
-	  } else
+	  }
   }
 
-  createVoting = () => {
+	generateKeys = () => {
 		// User-specified password 
 		var password = "wheethereum";
 		// Key derivation function (default: PBKDF2) 
 		var kdf = "pbkdf2"; // "scrypt" to use the scrypt kdf 
-		// Generate private key and the salt and initialization vector to encrypt it 
-		var dk = ethKeys.create();
-		console.log(dk);
+		// Generate private key and the salt and initialization vector to encrypt it
+		var keys = [];
+		for (var i=0; i < this.state.voterCount; i++){
+			keys.push(ethKeys.create());
+			console.log("Private key " + i + " " + keys[i].privateKey.toString('hex'));
+		}
+		this.setState({ voters: keys });
 	}
-
   // Voter Handlers
   handleVoterChange = (e) => {
     this.setState({ voterCount: e.target.value });
   }
+
+  createVoting = () => {
+		this.generateKeys();
+	}
+
   /*
   handleAddVoter = () => {
     this.setState({ voters: this.state.voters.concat([{ address: '' }]) });
