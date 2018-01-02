@@ -7,6 +7,7 @@ import moment from 'moment'
 import 'react-datetime/css/react-datetime.css'
 import qr from 'qr-image'
 import jspdf from 'jspdf'
+import util from 'ethereumjs-util'
 var ethKeys = require("ethereumjs-keys");
 
 class CreateVoting extends Component{
@@ -16,13 +17,14 @@ class CreateVoting extends Component{
     this.state = {
       web3: null,
       voterKeys: [],
-      voterAddresses: [],
+      voterPrivateAddr: [],
+      voterPublicAddr:[],
       voterCount: 0,
       candidates: [],
       startDate: 0,
       endDate: 0,
-      smartVotingInstance: null
     }
+    this.smartVotingInstance = null;
     this.password = '';
     this.createVoting = this.createVoting.bind(this);
     this.instantiateContract = this.instantiateContract.bind(this);
@@ -73,8 +75,44 @@ class CreateVoting extends Component{
   }
 
   createVoting = () => {
-		this.generateKeys();
 
+  	// Put candidates and voters in correct format for Solidity
+  	var sendCandidates = [];
+  	var sendVoters = [];
+  	for (var i=0; i < this.state.candidates.length; i++){
+  		sendCandidates.push(this.state.candidates[i].name);
+  	}
+  	for (var i = 0; i < this.state.voterCount; i++){
+  		sendVoters.push("0x" + this.state.voterPublicAddr[i]);
+  	}
+
+  	// Debug sent parameters
+  	//console.log(sendVoters);
+  	//console.log(sendCandidates);
+  	//console.log(this.state.startDate);
+  	//console.log(this.state.endDate);
+
+  	// Subtract 3 hours diffrence with server = 10800
+  	//console.log(this.state.startDate - 10800);
+
+  	// Create election on the contract instance
+		this.smartVotingInstance.createElection(sendCandidates, sendVoters,
+			this.state.startDate, this.state.endDate, {gas: 1400000, from: this.state.web3.eth.accounts[1]}
+			).then((tx) => {
+				console.log(tx);
+				this.smartVotingInstance.numberOfElections().then(function(number){
+					console.log("NUMBER OF ELECTIONS " + number);
+				})
+			})
+
+		// Send Ether to voter accounts
+		for(var i = 0; i < this.state.voterCount; i++){
+			this.state.web3.eth.sendTransaction(
+				{from: this.state.web3.eth.accounts[0],
+				to: this.state.voterPublicAddr[i],
+				value: this.state.web3.toWei(0.01, "ether")}
+				);
+		}
 	}
 
 	generateKeys = () => {
@@ -84,31 +122,35 @@ class CreateVoting extends Component{
 		var kdf = "pbkdf2"; // "scrypt" to use the scrypt kdf 
 		// Generate private key and the salt and initialization vector to encrypt it
 		var keys = [];
-		var addresses = [];
+		var privAddresses = [];
+		var publAddresses = [];
 		for (var i=0; i < this.state.voterCount; i++){
 			var k = ethKeys.create();
 			keys.push(k);
-			addresses.push(k.privateKey.toString('hex'));
+			var priv = k.privateKey.toString('hex');
+			privAddresses.push(priv);
+			publAddresses.push(mygetaddr(k.privateKey));
 		}
 		this.setState({ voterKeys: keys });
-		this.setState({ voterAddresses: addresses }, function () {
-	    console.log(this.state.voterAddresses);
+		this.setState({ voterPrivateAddr: privAddresses, voterPublicAddr: publAddresses }, function () {
+			this.createVoting();
 			this.generateQRCodes();	    
 		});
 
 	}
 
-	generateQRCodes = () => {		
+	generateQRCodes = () => {	
+		// Create QR code images	
 		var QRs = [];
 		for(var i=0; i < this.state.voterCount; i++){
 			var temp = {
-				address: this.state.voterAddresses[i],
+				address: this.state.voterPrivateAddr[i],
 				candidates: this.state.candidates
 			}	
-			console.log(temp);
 			QRs.push( qr.imageSync(JSON.stringify(temp).toString('base64'), { type: 'png', margin: 8 }) );
 		}
 
+		// Print codes to pdf
 		var doc = new jspdf('p', 'mm', 'a4');
 		var posX = 0;
 		var posY = 0;
@@ -268,7 +310,7 @@ class CreateVoting extends Component{
 								/>
 		        	</Col>
 						</Row>
-						<Button bsStyle="primary" onClick={this.createVoting}>
+						<Button bsStyle="primary" onClick={this.generateKeys}>
 						Create a voting
 						</Button>
 					</FormGroup>
@@ -294,5 +336,9 @@ class CreateVoting extends Component{
 		)
 	}
 }
-
+function mygetaddr(prikey) {	
+	var privatekey = new	Buffer(prikey,	'hex')	;	
+	var publickey =	util.privateToPublic(privatekey)	
+	return(util.publicToAddress(publickey).toString('hex'))	;		
+}
 export default CreateVoting
