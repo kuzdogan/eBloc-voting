@@ -2,41 +2,32 @@ import React, { Component } from 'react'
 import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import QrReader from 'react-qr-reader'
-import { FormGroup, Jumbotron, Radio, Navbar, Button } from 'react-bootstrap'
 import util	from 'ethereumjs-util'	
-var ethKeys = require("ethereumjs-keys");
+import { FormGroup, Jumbotron, Radio, Navbar, Button, Row } from 'react-bootstrap'	
 const loadash = require('lodash');
 const SolidityFunction = require('web3/lib/web3/function');
 const EthereumTx = require('ethereumjs-tx')
 
-class Vote extends Component{
+class Verify extends Component{
 	constructor(props){
 		super(props);
 		this.state = {
 			web3: null,
-			wallet: null,
-			delay: 300,
-			result: 'No result',
 			candidates: [],
+			candidateVotes: [],
 			address: '',
 			smartVotingInstance: null,
-			selectedOption: '0',
 			privateKey: '',
-			isFirefox: false
+			isFirefox: false,
+			isActive: false,
+			hasUserVoted: false
 		}
 		this.handleScan = this.handleScan.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.instantiateContract = this.instantiateContract.bind(this);
 		this.mygetaddr = this.mygetaddr.bind(this);
-		this.handleOptionChange = this.handleOptionChange.bind(this);
-		this.openImageDialog = this.openImageDialog.bind(this);
 	}
 
-	handleOptionChange(changeEvent) {
-		this.setState({
-		  selectedOption: changeEvent.target.value
-		});
-	}
 
 	mygetaddr(prikey) {	
 		var privatekey = new	Buffer(prikey,	'hex')	;	
@@ -66,7 +57,7 @@ class Vote extends Component{
 			// alert("Firefox");
 			this.setState({isFirefox: true});
 		} else{
-			// alert("NOT FIREFOX");
+			// alert("NOT FİREFOX");
 		}
   }
 	
@@ -94,53 +85,50 @@ class Vote extends Component{
 	  else {
 		  console.log("NO WEB3");
 		}
-		console.log('asdas',this.state.wallet)
   }
 
 	handleSubmit() {
-		console.log(this.state.privateKey, this.state.address);
 		this.smartVotingInstance.getElectionId("0x"+this.state.address).then( (num) => {
-			const candidateName = this.state.candidates[Number(this.state.selectedOption)].name;
-			const electionId = Number(num.toString());
-			var ABI = SmartVotingContract.abi;
-			var functionDef = new SolidityFunction('', loadash.find(ABI, { name: 'voteFor' }), '');
-			var payloadData = functionDef.toPayload([candidateName,electionId]).data;
-			const privateKey = Buffer.from(this.state.privateKey, 'hex')
-			const gasprice = this.state.web3.toHex(this.state.web3.eth.gasPrice);	
-			const latestblock = this.state.web3.eth.getBlock("latest");	
-			const gaslimit = this.state.web3.toHex(80000);
-			const nonce =	this.state.web3.eth.getTransactionCount('0x'+this.state.address);
-			const txParams = {
-				nonce,
-				gasPrice: gasprice,
-				gasLimit: gaslimit,
-				to: '0xfa57880a745ea99992b19e3bb362564d6c113bbd', // Contract address
-				value: '0x00',
-				data: payloadData
-				// EIP 155 chainId - mainnet: 1, ropsten: 3
-				//chainId: 23422
-			}
-			const tx = new EthereumTx(txParams)
-			tx.sign(privateKey)
-			const serializedTx = tx.serialize().toString('hex');
-			console.log(serializedTx);
-			this.state.web3.eth.sendRawTransaction('0x'+serializedTx,function(err,result){
-				console.log(err,result);
-				if(err) {
-					console.log(err);
-				} else {
-	
-					console.log(result);
+			console.log("Election id is: " + num);
+			this.smartVotingInstance.isActive(num).then( (isActive) => {
+				if (isActive) {
+					this.setState({
+						isActive: true
+					})
+					console.log("The election is active");
+					// Has user voted?
+					this.smartVotingInstance.isVoted('0x' + this.state.address).then( (voted) => {
+						this.setState({
+							hasUserVoted: voted
+						})
+					})
 				}
-			});
-			/* this.state.web3.personal.importRawKey(this.state.privateKey, pwd);
-			if(this.state.web3.personal.unlockAccount(this.state.address, pwd)) {
-				this.smartVotingInstance.voteFor(candidateName, electionId, {gas: 1400000, from: this.state.address}
-				).then((tx) => {
-					console.log(tx);
-				})
-			}*/
+
+				else {
+					console.log("The election has ended");
+					// Get candidates vote count
+					for (var i = 0; i < this.state.candidates.length; i++){
+						this.smartVotingInstance.getVoteNumber(num, this.state.candidates[i].name).then((voteCount) => {
+							var tempVotes = this.state.candidateVotes;
+							tempVotes.push(voteCount.toString(10));
+							this.setState({
+								candidateVotes: tempVotes
+							})
+						})
+					}
+					// Has user voted?
+					console.log("Has user voted?");
+					this.smartVotingInstance.isVoted('0x' + this.state.address).then( (voted) => {
+						this.setState({
+							hasUserVoted: voted
+						})
+						console.log(voted);
+					})					
+				}
+			})
 		})
+		console.log("Checked the Election");
+		console.log(this.state);
 	}
 
 	handleScan(data){
@@ -176,7 +164,6 @@ class Vote extends Component{
 					onError={this.handleError}
 					onScan={this.handleScan}
 					style={{width: '25%'}}
-					legacyMode
 				/>;
 			}
   }
@@ -187,25 +174,24 @@ class Vote extends Component{
 					<a href="#" className="pure-menu-heading pure-menu-link">eBloc Voting System</a>
 				</nav>
 
+				<h1>Here You Can Verify Your Votes and See Election Results</h1>
 				<main className="container">
+					<h2> Scan your QR Code </h2>
 					<div style={{marginTop: '50px'}} className="row justify-content-md-center">
 						{this.renderQRReader()}
 					</div>
-					<p>Your private key is: {this.state.address}</p>
 					<p>{this.state.result}</p>
 					<div>
 					<FormGroup>
 						{this.state.candidates.map((c,index)=>(
 							<div className="radio">
-								<label>
-								<input type="radio" value={""+index} 
-								checked={this.state.selectedOption === (''+index)} 
-								onChange={this.handleOptionChange} />
-								{c.name}
-								</label>
+								<Row>
+									{c.name}: {this.state.candidateVotes[index]}
+								</Row>
 							</div>
 							
 						))}
+						<p> Have you voted: {this.state.hasUserVoted ? "yes" : "no"} </p>
 						{this.state.isFirefox ? null : <Button bsStyle="primary" onClick={this.openImageDialog}>Submit QR Code</Button>}
 						<Button bsStyle="primary" onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
 					</FormGroup>
@@ -216,14 +202,4 @@ class Vote extends Component{
 	}
 }
 
-// Not used
-function randomStr() {
-	var text = "";
-	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  
-	for (var i = 0; i < 5; i++)
-	  text += possible.charAt(Math.floor(Math.random() * possible.length));
-	return text;
-}
-
-export default Vote
+export default Verify
