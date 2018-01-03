@@ -9,8 +9,6 @@ const loadash = require('lodash');
 const SolidityFunction = require('web3/lib/web3/function');
 const EthereumTx = require('ethereumjs-tx')
 
-
-
 class Vote extends Component{
 	constructor(props){
 		super(props);
@@ -23,13 +21,15 @@ class Vote extends Component{
 			address: '',
 			smartVotingInstance: null,
 			selectedOption: '0',
-			privateKey: ''
+			privateKey: '',
+			isFirefox: false
 		}
 		this.handleScan = this.handleScan.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.instantiateContract = this.instantiateContract.bind(this);
 		this.mygetaddr = this.mygetaddr.bind(this);
 		this.handleOptionChange = this.handleOptionChange.bind(this);
+		this.openImageDialog = this.openImageDialog.bind(this);
 	}
 
 	handleOptionChange(changeEvent) {
@@ -58,45 +58,48 @@ class Vote extends Component{
 		.catch(() => {
 		  console.log('Error finding web3.')
 		})
+
+		// Check browser for QR scanner
+		if(navigator.userAgent.indexOf("Firefox") != -1){
+			alert("Firefox");
+			this.setState({isFirefox: true});
+		} else{
+			alert("NOT FİREFOX");
+		}
+  }
 	
-	  }
-	
-	  componentDidMount(){
-	  }
-	
-	  instantiateContract() {
-		  if(this.state.web3){
+  instantiateContract() {
+  	// Check web3
+	  if(this.state.web3){
+	  	// Get contract instance
 			const contract = require('truffle-contract')
 			const smartVoting = contract(SmartVotingContract)
 			smartVoting.setProvider(this.state.web3.currentProvider)
-	
-			// Declaring this for later so we can chain functions on SimpleStorage.
-	
+
 			smartVoting.deployed().then(instance => {
 				this.smartVotingInstance = instance;
 				return this.smartVotingInstance.numberOfElections()
 			}).then(numElections => { // Arrow function for using "this"
 				console.log("Number of elections so far is: " + numElections);
-			}).catch((err)=>{
+			}).catch( err => {
 				console.log(err);
 			})
-	
+
 			this.state.web3.eth.getAccounts((error, accounts) => {
 				console.log(accounts);
 			})
-		  }
-		  else {
-			  console.log("NO WEB3");
-			}
-			console.log('asdas',this.state.wallet)
 	  }
+	  else {
+		  console.log("NO WEB3");
+		}
+		console.log('asdas',this.state.wallet)
+  }
 
 	handleSubmit() {
 		console.log(this.state.privateKey, this.state.address);
-		this.smartVotingInstance.getElectionId("0x"+this.state.address).then((num)=>{
+		this.smartVotingInstance.getElectionId("0x"+this.state.address).then( (num) => {
 			const candidateName = this.state.candidates[Number(this.state.selectedOption)].name;
 			const electionId = Number(num.toString());
-			//const pwd = randomStr();
 			var ABI = SmartVotingContract.abi;
 			var functionDef = new SolidityFunction('', loadash.find(ABI, { name: 'voteFor' }), '');
 			var payloadData = functionDef.toPayload([candidateName,electionId]).data;
@@ -109,7 +112,7 @@ class Vote extends Component{
 				nonce,
 				gasPrice: gasprice,
 				gasLimit: gaslimit,
-				to: '0xfa57880a745ea99992b19e3bb362564d6c113bbd', 
+				to: '0xfa57880a745ea99992b19e3bb362564d6c113bbd', // Contract address
 				value: '0x00',
 				data: payloadData
 				// EIP 155 chainId - mainnet: 1, ropsten: 3
@@ -147,29 +150,46 @@ class Vote extends Component{
 				candidates: result.candidates,
 				result: JSON.stringify(result)
 			})
-
 		}
 	}
-	  handleError(err){
-		console.log('asdsad '+err)
-	  }
-	render(){
+  handleError(err){
+		console.log('asdsad '+ err)
+  }
+  openImageDialog() {
+    this.refs.qrReader.openImageDialog()
+  }
+  renderQRReader(){
+  	if(this.state.isFirefox) {
+  		return	<QrReader
+					ref="qrReader"
+					delay={this.state.delay}
+					onError={this.handleError}
+					onScan={this.handleScan}
+					style={{width: '25%'}}
+				/>;
+			} else{
+				return <QrReader
+					ref="qrReader"
+					delay={this.state.delay}
+					onError={this.handleError}
+					onScan={this.handleScan}
+					style={{width: '25%'}}
+					legacyMode
+				/>;
+			}
+  }
+	render(){		
 		return(
 			<div className="App">
 				<nav className="navbar pure-menu pure-menu-horizontal">
-					<a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
+					<a href="#" className="pure-menu-heading pure-menu-link">eBloc Voting System</a>
 				</nav>
 
 				<main className="container">
 					<div style={{marginTop: '50px'}} className="row justify-content-md-center">
-						<QrReader
-							delay={this.state.delay}
-							onError={this.handleError}
-							onScan={this.handleScan}
-							style={{width: '25%'}}
-						/>
+						{this.renderQRReader()}
 					</div>
-					<p>{this.state.address}</p>
+					<p>Your private key is: {this.state.address}</p>
 					<p>{this.state.result}</p>
 					<div>
 					<FormGroup>
@@ -184,6 +204,7 @@ class Vote extends Component{
 							</div>
 							
 						))}
+						{this.state.isFirefox ? null : <Button bsStyle="primary" onClick={this.openImageDialog}>Submit QR Code</Button>}
 						<Button bsStyle="primary" onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
 					</FormGroup>
 					</div>
@@ -193,16 +214,14 @@ class Vote extends Component{
 	}
 }
 
-
+// Not used
 function randomStr() {
 	var text = "";
 	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   
 	for (var i = 0; i < 5; i++)
 	  text += possible.charAt(Math.floor(Math.random() * possible.length));
-  
 	return text;
-  }
-  
+}
 
 export default Vote
