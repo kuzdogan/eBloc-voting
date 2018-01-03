@@ -75,12 +75,6 @@ class CreateVoting extends Component{
   }
 
   createVoting = () => {
-
-		if(this.state.startDate >= this.state.endDate) {
-			alert("Start time cannot be greater than or equal end time");
-			return;
-		}
-
   	// Put candidates and voters in correct format for Solidity
   	var sendCandidates = [];
   	var sendVoters = [];
@@ -227,15 +221,13 @@ class CreateVoting extends Component{
 		return(
 		<div className="page">
 			<nav className="navbar pure-menu pure-menu-horizontal">
-					<a href="#" className="pure-menu-heading pure-menu-link">Samrt Voting</a>
+					<a href="/" className="pure-menu-heading pure-menu-link">Smart Voting</a>
 			</nav>
 			<Grid>
-				<h1> Here you can create votings</h1>
 				<Form>
 					<FormGroup>
-						
 						<Row>
-							<Col md={6}>
+							<Col md={4}>
 								<ControlLabel>Number of Voters</ControlLabel>
 								<FormControl
 									id="voter-count"
@@ -246,24 +238,6 @@ class CreateVoting extends Component{
 								/>
 							</Col>
 						</Row>
-						{/*this.state.voters.map((voter, idx) => (
-		          <Row className="voter-input">
-		          	<Col md={6}>
-			            <FormControl
-			              type="text"
-			              placeholder={`Voter #${idx + 1} address`}
-			              value={voter.address}
-			              onChange={this.handleVoterChange(idx)}
-			            />
-			          </Col>
-			          <Col>
-			            <Button bsStyle="danger" onClick={this.handleRemoveVoter(idx)}>
-			            	<Glyphicon glyph="trash"/>
-		            	</Button>
-	            	</Col>
-		          </Row>
-		        ))
-	        	<Button bsStyle="primary" onClick={this.handleAddVoter}>Add Voter</Button>*/}
 	        </FormGroup>
 	        <FormGroup>
 						<Row>
@@ -273,7 +247,7 @@ class CreateVoting extends Component{
 						</Row>
 						{this.state.candidates.map((candidate, idx) => (
 		          <Row className="candidate-input">
-		          	<Col md={6}>
+		          	<Col md={4}>
 			            <FormControl
 			              type="text"
 			              placeholder={`Candidate #${idx + 1} Name`}
@@ -298,7 +272,7 @@ class CreateVoting extends Component{
 							</Col>
 						</Row>
 	        	<Row>      
-		        	<Col md={6} style={{marginBottom: '10px'}}>
+		        	<Col md={4} style={{marginBottom: '10px'}}>
 								<Datetime 
 									defaultValue={new Date()}
 									onChange={this.handleStartDateChange}
@@ -313,7 +287,7 @@ class CreateVoting extends Component{
 							</Col>
 	        	</Row>
 	        	<Row>      
-		        	<Col md={6} style={{marginBottom: '10px'}}>
+		        	<Col md={4} style={{marginBottom: '10px'}}>
 								<Datetime 
 									id="end-date"
 									defaultValue={new Date()}
@@ -328,22 +302,6 @@ class CreateVoting extends Component{
 						</Button>
 					</FormGroup>
 				</Form>
-				<div className="contract-info">
-					<h2> Voter Number is</h2>
-		          <Row className="voter-count">
-		          	<p> Voter Count: {this.state.voterCount} </p>
-		          </Row>
-					<h2> Candidates are</h2>
-						{this.state.candidates.map((candidate, idx) => (
-		          <Row className="candidate-{idx}">
-		          	<p> Candidate {idx}: {candidate.name} </p>
-		          </Row>
-		        ))}
-		      <h2> Start Date is </h2>
-		      	<Row> {this.state.startDate} </Row>
-		      <h2> End Date is </h2>
-		      	<Row> {this.state.endDate} </Row>
-				</div>
 			</Grid>
 		</div>
 		)
