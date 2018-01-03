@@ -5,6 +5,9 @@ import QrReader from 'react-qr-reader'
 import { FormGroup, Jumbotron, Radio, Navbar, Button } from 'react-bootstrap'
 import util	from 'ethereumjs-util'	
 var ethKeys = require("ethereumjs-keys");
+const loadash = require('lodash');
+const SolidityFunction = require('web3/lib/web3/function');
+const EthereumTx = require('ethereumjs-tx')
 
 
 
@@ -13,6 +16,7 @@ class Vote extends Component{
 		super(props);
 		this.state = {
 			web3: null,
+			wallet: null,
 			delay: 300,
 			result: 'No result',
 			candidates: [],
@@ -46,6 +50,7 @@ class Vote extends Component{
 		.then(results => {
 		  this.setState({
 			web3: results.web3,
+			wallet: results.wallet
 		  },function(){
 					this.instantiateContract();		 	
 		  })
@@ -72,6 +77,8 @@ class Vote extends Component{
 				return this.smartVotingInstance.numberOfElections()
 			}).then(numElections => { // Arrow function for using "this"
 				console.log("Number of elections so far is: " + numElections);
+			}).catch((err)=>{
+				console.log(err);
 			})
 	
 			this.state.web3.eth.getAccounts((error, accounts) => {
@@ -80,22 +87,54 @@ class Vote extends Component{
 		  }
 		  else {
 			  console.log("NO WEB3");
-		  }
+			}
+			console.log('asdas',this.state.wallet)
 	  }
 
 	handleSubmit() {
-		console.log('Voted')
+		console.log(this.state.privateKey, this.state.address);
 		this.smartVotingInstance.getElectionId("0x"+this.state.address).then((num)=>{
 			const candidateName = this.state.candidates[Number(this.state.selectedOption)].name;
 			const electionId = Number(num.toString());
-			const pwd = randomStr();
-			this.state.web3.personal.importRawKey(this.state.privateKey, pwd);
+			//const pwd = randomStr();
+			var ABI = SmartVotingContract.abi;
+			var functionDef = new SolidityFunction('', loadash.find(ABI, { name: 'voteFor' }), '');
+			var payloadData = functionDef.toPayload([candidateName,electionId]).data;
+			const privateKey = Buffer.from(this.state.privateKey, 'hex')
+			const gasprice = this.state.web3.toHex(this.state.web3.eth.gasPrice);	
+			const latestblock = this.state.web3.eth.getBlock("latest");	
+			const gaslimit = this.state.web3.toHex(80000);
+			const nonce =	this.state.web3.eth.getTransactionCount('0x'+this.state.address);
+			const txParams = {
+				nonce,
+				gasPrice: gasprice,
+				gasLimit: gaslimit,
+				to: '0xfa57880a745ea99992b19e3bb362564d6c113bbd', 
+				value: '0x00',
+				data: payloadData
+				// EIP 155 chainId - mainnet: 1, ropsten: 3
+				//chainId: 23422
+			}
+			const tx = new EthereumTx(txParams)
+			tx.sign(privateKey)
+			const serializedTx = tx.serialize().toString('hex');
+			console.log(serializedTx);
+			this.state.web3.eth.sendRawTransaction('0x'+serializedTx,function(err,result){
+				console.log(err,result);
+				if(err) {
+					console.log(err);
+				} else {
+	
+					console.log(result);
+				}
+			});
+			/* this.state.web3.personal.importRawKey(this.state.privateKey, pwd);
 			if(this.state.web3.personal.unlockAccount(this.state.address, pwd)) {
 				this.smartVotingInstance.voteFor(candidateName, electionId, {gas: 1400000, from: this.state.address}
 				).then((tx) => {
 					console.log(tx);
 				})
-			}
+			}*/
 		})
 	}
 
@@ -110,7 +149,7 @@ class Vote extends Component{
 			})
 
 		}
-	  }
+	}
 	  handleError(err){
 		console.log('asdsad '+err)
 	  }
