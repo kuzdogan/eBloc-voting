@@ -9,8 +9,6 @@ const loadash = require('lodash');
 const SolidityFunction = require('web3/lib/web3/function');
 const EthereumTx = require('ethereumjs-tx')
 
-
-
 class Vote extends Component{
 	constructor(props){
 		super(props);
@@ -59,44 +57,40 @@ class Vote extends Component{
 		  console.log('Error finding web3.')
 		})
 	
-	  }
+  }
 	
-	  componentDidMount(){
-	  }
-	
-	  instantiateContract() {
-		  if(this.state.web3){
+  instantiateContract() {
+  	// Check web3
+	  if(this.state.web3){
+	  	// Get contract instance
 			const contract = require('truffle-contract')
 			const smartVoting = contract(SmartVotingContract)
 			smartVoting.setProvider(this.state.web3.currentProvider)
-	
-			// Declaring this for later so we can chain functions on SimpleStorage.
-	
+
 			smartVoting.deployed().then(instance => {
 				this.smartVotingInstance = instance;
 				return this.smartVotingInstance.numberOfElections()
 			}).then(numElections => { // Arrow function for using "this"
 				console.log("Number of elections so far is: " + numElections);
-			}).catch((err)=>{
+			}).catch( err => {
 				console.log(err);
 			})
-	
+
 			this.state.web3.eth.getAccounts((error, accounts) => {
 				console.log(accounts);
 			})
-		  }
-		  else {
-			  console.log("NO WEB3");
-			}
-			console.log('asdas',this.state.wallet)
 	  }
+	  else {
+		  console.log("NO WEB3");
+		}
+		console.log('asdas',this.state.wallet)
+  }
 
 	handleSubmit() {
 		console.log(this.state.privateKey, this.state.address);
-		this.smartVotingInstance.getElectionId("0x"+this.state.address).then((num)=>{
+		this.smartVotingInstance.getElectionId("0x"+this.state.address).then( (num) => {
 			const candidateName = this.state.candidates[Number(this.state.selectedOption)].name;
 			const electionId = Number(num.toString());
-			//const pwd = randomStr();
 			var ABI = SmartVotingContract.abi;
 			var functionDef = new SolidityFunction('', loadash.find(ABI, { name: 'voteFor' }), '');
 			var payloadData = functionDef.toPayload([candidateName,electionId]).data;
@@ -109,7 +103,7 @@ class Vote extends Component{
 				nonce,
 				gasPrice: gasprice,
 				gasLimit: gaslimit,
-				to: '0xfa57880a745ea99992b19e3bb362564d6c113bbd', 
+				to: '0xfa57880a745ea99992b19e3bb362564d6c113bbd', // Contract address
 				value: '0x00',
 				data: payloadData
 				// EIP 155 chainId - mainnet: 1, ropsten: 3
@@ -147,17 +141,16 @@ class Vote extends Component{
 				candidates: result.candidates,
 				result: JSON.stringify(result)
 			})
-
 		}
 	}
-	  handleError(err){
-		console.log('asdsad '+err)
-	  }
+  handleError(err){
+		console.log('asdsad '+ err)
+  }
 	render(){
 		return(
 			<div className="App">
 				<nav className="navbar pure-menu pure-menu-horizontal">
-					<a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
+					<a href="#" className="pure-menu-heading pure-menu-link">eBloc Voting System</a>
 				</nav>
 
 				<main className="container">
@@ -169,7 +162,7 @@ class Vote extends Component{
 							style={{width: '25%'}}
 						/>
 					</div>
-					<p>{this.state.address}</p>
+					<p>Your private key is: {this.state.address}</p>
 					<p>{this.state.result}</p>
 					<div>
 					<FormGroup>
@@ -193,7 +186,7 @@ class Vote extends Component{
 	}
 }
 
-
+// Not used
 function randomStr() {
 	var text = "";
 	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -202,7 +195,7 @@ function randomStr() {
 	  text += possible.charAt(Math.floor(Math.random() * possible.length));
   
 	return text;
-  }
+}
   
 
 export default Vote
