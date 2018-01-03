@@ -21,13 +21,15 @@ class Vote extends Component{
 			address: '',
 			smartVotingInstance: null,
 			selectedOption: '0',
-			privateKey: ''
+			privateKey: '',
+			isFirefox: false
 		}
 		this.handleScan = this.handleScan.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.instantiateContract = this.instantiateContract.bind(this);
 		this.mygetaddr = this.mygetaddr.bind(this);
 		this.handleOptionChange = this.handleOptionChange.bind(this);
+		this.openImageDialog = this.openImageDialog.bind(this);
 	}
 
 	handleOptionChange(changeEvent) {
@@ -56,7 +58,14 @@ class Vote extends Component{
 		.catch(() => {
 		  console.log('Error finding web3.')
 		})
-	
+
+		// Check browser for QR scanner
+		if(navigator.userAgent.indexOf("Firefox") != -1){
+			alert("Firefox");
+			this.setState({isFirefox: true});
+		} else{
+			alert("NOT FİREFOX");
+		}
   }
 	
   instantiateContract() {
@@ -146,7 +155,30 @@ class Vote extends Component{
   handleError(err){
 		console.log('asdsad '+ err)
   }
-	render(){
+  openImageDialog() {
+    this.refs.qrReader.openImageDialog()
+  }
+  renderQRReader(){
+  	if(this.state.isFirefox) {
+  		return	<QrReader
+					ref="qrReader"
+					delay={this.state.delay}
+					onError={this.handleError}
+					onScan={this.handleScan}
+					style={{width: '25%'}}
+				/>;
+			} else{
+				return <QrReader
+					ref="qrReader"
+					delay={this.state.delay}
+					onError={this.handleError}
+					onScan={this.handleScan}
+					style={{width: '25%'}}
+					legacyMode
+				/>;
+			}
+  }
+	render(){		
 		return(
 			<div className="App">
 				<nav className="navbar pure-menu pure-menu-horizontal">
@@ -155,12 +187,7 @@ class Vote extends Component{
 
 				<main className="container">
 					<div style={{marginTop: '50px'}} className="row justify-content-md-center">
-						<QrReader
-							delay={this.state.delay}
-							onError={this.handleError}
-							onScan={this.handleScan}
-							style={{width: '25%'}}
-						/>
+						{this.renderQRReader()}
 					</div>
 					<p>Your private key is: {this.state.address}</p>
 					<p>{this.state.result}</p>
@@ -177,6 +204,7 @@ class Vote extends Component{
 							</div>
 							
 						))}
+						{this.state.isFirefox ? null : <Button bsStyle="primary" onClick={this.openImageDialog}>Submit QR Code</Button>}
 						<Button bsStyle="primary" onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
 					</FormGroup>
 					</div>
@@ -193,9 +221,7 @@ function randomStr() {
   
 	for (var i = 0; i < 5; i++)
 	  text += possible.charAt(Math.floor(Math.random() * possible.length));
-  
 	return text;
 }
-  
 
 export default Vote
