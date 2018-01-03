@@ -97,7 +97,7 @@ class CreateVoting extends Component{
 
   	// Create election on the contract instance
 		this.smartVotingInstance.createElection(sendCandidates, sendVoters,
-			this.state.startDate, this.state.endDate, {gas: 1400000, from: this.state.web3.eth.accounts[1]}
+			this.state.startDate, this.state.endDate, {gas: 1400000, from: this.state.web3.eth.accounts[0]}
 			).then((tx) => {
 				console.log(tx);
 				this.smartVotingInstance.numberOfElections().then(function(number){
