@@ -76,6 +76,11 @@ class CreateVoting extends Component{
 
   createVoting = () => {
 
+		if(this.state.startDate >= this.state.endDate) {
+			alert("Start time cannot be greater than or equal end time");
+			return;
+		}
+
   	// Put candidates and voters in correct format for Solidity
   	var sendCandidates = [];
   	var sendVoters = [];
@@ -221,15 +226,17 @@ class CreateVoting extends Component{
 	render(){
 		return(
 		<div className="page">
+			<nav className="navbar pure-menu pure-menu-horizontal">
+					<a href="#" className="pure-menu-heading pure-menu-link">Samrt Voting</a>
+			</nav>
 			<Grid>
 				<h1> Here you can create votings</h1>
 				<Form>
 					<FormGroup>
-						<Row>
-							<p> Enter Number of Voters </p>	
-						</Row>
+						
 						<Row>
 							<Col md={6}>
+								<ControlLabel>Number of Voters</ControlLabel>
 								<FormControl
 									id="voter-count"
 									type="text"
@@ -260,9 +267,10 @@ class CreateVoting extends Component{
 	        </FormGroup>
 	        <FormGroup>
 						<Row>
-							<p> Enter candidate names </p>	
+							<Col md={4}>
+								<ControlLabel>Candidate names</ControlLabel>	
+							</Col>
 						</Row>
-
 						{this.state.candidates.map((candidate, idx) => (
 		          <Row className="candidate-input">
 		          	<Col md={6}>
@@ -270,7 +278,8 @@ class CreateVoting extends Component{
 			              type="text"
 			              placeholder={`Candidate #${idx + 1} Name`}
 			              value={candidate.name}
-			              onChange={this.handleCandidateChange(idx)}
+										onChange={this.handleCandidateChange(idx)}
+										style={{marginBottom: '10px'}}
 			            />
 			          </Col>
 			          <Col>
@@ -284,29 +293,33 @@ class CreateVoting extends Component{
 		      </FormGroup>
 		      <FormGroup inline>
 		        <Row>
-	        		<ControlLabel> Select starting date and time</ControlLabel>
-	        	</Row>
+							<Col md={4}>
+	        			<ControlLabel> Select starting date and time</ControlLabel>
+							</Col>
+						</Row>
 	        	<Row>      
-		        	<Col md={6}>
+		        	<Col md={6} style={{marginBottom: '10px'}}>
 								<Datetime 
-								defaultValue={new Date()}
-								onChange={this.handleStartDateChange}
-								dateFormat="D MMMM YYYY"
-								isValidDate={this.isValidStartDate}
+									defaultValue={new Date()}
+									onChange={this.handleStartDateChange}
+									dateFormat="D MMMM YYYY"
+									isValidDate={this.isValidStartDate}
 								/>
 		        	</Col>
 						</Row>
 		        <Row>
-	        		<ControlLabel> Select end date and time</ControlLabel>
+							<Col md={4}>
+								<ControlLabel> Select end date and time</ControlLabel>
+							</Col>
 	        	</Row>
 	        	<Row>      
-		        	<Col md={6}>
+		        	<Col md={6} style={{marginBottom: '10px'}}>
 								<Datetime 
-								id="end-date"
-								defaultValue={new Date()}
-								onChange={this.handleEndDateChange}
-								dateFormat="D MMMM YYYY"
-								isValidDate={this.isValidEnd}
+									id="end-date"
+									defaultValue={new Date()}
+									onChange={this.handleEndDateChange}
+									dateFormat="D MMMM YYYY"
+									isValidDate={this.isValidEnd}
 								/>
 		        	</Col>
 						</Row>

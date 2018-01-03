@@ -10,7 +10,7 @@ class VotingApp extends Component {
     return (
       <div className="App">
         <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
+            <a href="#" className="pure-menu-heading pure-menu-link">Samrt Voting</a>
         </nav>
 
         <main className="container">
@@ -18,8 +18,8 @@ class VotingApp extends Component {
             <div className="pure-u-1-1">
               <h1>Voting App</h1>
               <p>Please select to create a voting or vote in an existing election</p>
-              <Button bsStyle="primary" href="/create"> Create Election </Button>
-              <Button bsStyle="primary" href="/vote"> Vote in an Election </Button>
+              <Button bsStyle="primary" href="/create" style={{margin: '5px'}}> Create Election </Button>
+              <Button bsStyle="primary" href="/vote" style={{margin: '5px'}}> Vote in an Election </Button>
             </div>
           </div>
         </main>
