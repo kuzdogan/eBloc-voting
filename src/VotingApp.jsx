@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, {Navbar, Nav, MenuItem, Component } from 'react'
 import {Button} from 'react-bootstrap'
 
 class VotingApp extends Component {
@@ -9,9 +9,24 @@ class VotingApp extends Component {
   render() {
     return (
       <div className="App">
-        <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Smart Voting</a>
-        </nav>
+        <Navbar inverse collapseOnSelect>
+          <div className="navbar-container">
+            <Navbar.Header>
+              <Navbar.Brand>
+                <a href="/">eBloc Voting</a>
+              </Navbar.Brand>
+              <Navbar.Toggle />
+            </Navbar.Header>
+            <Navbar.Collapse>
+              <Nav>
+                <MenuItem eventKey={1} href="/create">Create Voting</MenuItem>
+                <MenuItem eventKey={2} href="/vote">Cast Vote</MenuItem>
+                <MenuItem eventKey={2} href="/verify">Verify Election</MenuItem>
+              </Nav>
+            </Navbar.Collapse>
+          </div>
+        </Navbar>
+
 
         <main className="container">
           <div className="pure-g">
