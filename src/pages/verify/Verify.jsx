@@ -3,7 +3,7 @@ import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import QrReader from 'react-qr-reader'
 import util	from 'ethereumjs-util'	
-import { FormGroup, Jumbotron, Radio, Navbar, Button, Row } from 'react-bootstrap'	
+import { FormGroup, Jumbotron, Radio, Navbar, Nav, NavItem, Button, Row } from 'react-bootstrap'	
 const loadash = require('lodash');
 const SolidityFunction = require('web3/lib/web3/function');
 const EthereumTx = require('ethereumjs-tx')
@@ -20,7 +20,8 @@ class Verify extends Component{
 			privateKey: '',
 			isFirefox: false,
 			isActive: false,
-			hasUserVoted: false
+			hasUserVoted: false,
+			hasSubmit: false
 		}
 		this.handleScan = this.handleScan.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
@@ -126,6 +127,7 @@ class Verify extends Component{
 					})					
 				}
 			})
+			this.setState({ hasSubmit: true });
 		})
 		console.log("Checked the Election");
 		console.log(this.state);
@@ -164,34 +166,64 @@ class Verify extends Component{
 					onError={this.handleError}
 					onScan={this.handleScan}
 					style={{width: '25%'}}
+					legacyMode
 				/>;
 			}
   }
 	render(){		
 		return(
 			<div className="App">
-				<nav className="navbar pure-menu pure-menu-horizontal">
-					<a href="#" className="pure-menu-heading pure-menu-link">eBloc Voting System</a>
-				</nav>
+				 <Navbar inverse collapseOnSelect>
+				 	<div className="navbar-container">
+				    <Navbar.Header>
+				      <Navbar.Brand>
+				        <a href="/">eBloc Voting</a>
+				      </Navbar.Brand>
+				      <Navbar.Toggle />
+				    </Navbar.Header>
+				    <Navbar.Collapse>
+				      <Nav>
+				        <NavItem eventKey={1} href="/create">Create Voting</NavItem>
+				        <NavItem eventKey={2} href="/vote">Cast Vote</NavItem>
+				        <NavItem eventKey={2} href="/verify">Verify Election</NavItem>
+				      </Nav>
+				    </Navbar.Collapse>
+				  </div>
+			  </Navbar>
 
 				<h1>Here You Can Verify Your Votes and See Election Results</h1>
 				<main className="container">
-					<h2> Scan your QR Code </h2>
+					<h2> Scan or Upload your QR Code </h2>
 					<div style={{marginTop: '50px'}} className="row justify-content-md-center">
 						{this.renderQRReader()}
 					</div>
-					<p>{this.state.result}</p>
 					<div>
+					{ this.state.hasSubmit && (
+							this.state.isActive ? (
+									<p> This election is currently active. Please check for results after the deadline passes. </p>
+								) :
+								( <p> This election has ended. Please check the results below </p>)
+						)
+					}
 					<FormGroup>
-						{this.state.candidates.map((c,index)=>(
-							<div className="radio">
+						{this.state.hasSubmit && 
+							(this.state.candidates.map((c,index)=>(
+
+							<div className="vote-results">
 								<Row>
-									{c.name}: {this.state.candidateVotes[index]}
+									<p> {c.name}: {this.state.candidateVotes[index]} </p>
 								</Row>
 							</div>
 							
-						))}
-						<p> Have you voted: {this.state.hasUserVoted ? "yes" : "no"} </p>
+							))
+							)
+						}
+						{this.state.hasSubmit && (
+							<div className="msg">
+								<p> Have you voted: {this.state.hasUserVoted ? "yes" : "no"} </p>
+								<p> Your address is: {this.state.address} </p>
+							</div>
+						)}
 						{this.state.isFirefox ? null : <Button bsStyle="primary" onClick={this.openImageDialog}>Submit QR Code</Button>}
 						<Button bsStyle="primary" onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
 					</FormGroup>

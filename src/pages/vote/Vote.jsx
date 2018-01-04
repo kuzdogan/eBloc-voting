@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import QrReader from 'react-qr-reader'
-import { FormGroup, Button, Grid, Row, Col, ButtonToolbar } from 'react-bootstrap'
-import util	from 'ethereumjs-util';
+import {Navbar, Nav, NavItem, FormGroup, Jumbotron, Radio, Button } from 'react-bootstrap'
+import util	from 'ethereumjs-util'
 const loadash = require('lodash');
 const SolidityFunction = require('web3/lib/web3/function');
 const EthereumTx = require('ethereumjs-tx')
@@ -173,9 +173,23 @@ class Vote extends Component{
 	render(){		
 		return(
 			<div className="App">
-				<nav className="navbar pure-menu pure-menu-horizontal">
-					<a href="/" className="pure-menu-heading pure-menu-link">eBloc Voting System</a>
-				</nav>
+				 <Navbar inverse collapseOnSelect>
+				 	<div className="navbar-container">
+				    <Navbar.Header>
+				      <Navbar.Brand>
+				        <a href="/">eBloc Voting</a>
+				      </Navbar.Brand>
+				      <Navbar.Toggle />
+				    </Navbar.Header>
+				    <Navbar.Collapse>
+				      <Nav>
+				        <NavItem eventKey={1} href="/create">Create Voting</NavItem>
+				        <NavItem eventKey={2} href="/vote">Cast Vote</NavItem>
+				        <NavItem eventKey={2} href="/verify">Verify Election</NavItem>
+				      </Nav>
+				    </Navbar.Collapse>
+				  </div>
+			  </Navbar>
 
 				<main className="container">
 					<Grid>
