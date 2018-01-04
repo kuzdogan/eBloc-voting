@@ -265,7 +265,7 @@ class CreateVoting extends Component{
 		        ))}
         		<Button bsStyle="primary" onClick={this.handleAddCandidate}>Add Candidate</Button>
 		      </FormGroup>
-		      <FormGroup inline>
+		      <FormGroup>
 		        <Row>
 							<Col md={4}>
 	        			<ControlLabel> Select starting date and time</ControlLabel>

@@ -2,9 +2,8 @@ import React, { Component } from 'react'
 import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import QrReader from 'react-qr-reader'
-import { FormGroup, Jumbotron, Radio, Navbar, Button } from 'react-bootstrap'
-import util	from 'ethereumjs-util'	
-var ethKeys = require("ethereumjs-keys");
+import { FormGroup, Button, Grid, Row, Col, ButtonToolbar } from 'react-bootstrap'
+import util	from 'ethereumjs-util';
 const loadash = require('lodash');
 const SolidityFunction = require('web3/lib/web3/function');
 const EthereumTx = require('ethereumjs-tx')
@@ -117,8 +116,6 @@ class Vote extends Component{
 				to: '0xfa57880a745ea99992b19e3bb362564d6c113bbd', // Contract address
 				value: '0x00',
 				data: payloadData
-				// EIP 155 chainId - mainnet: 1, ropsten: 3
-				//chainId: 23422
 			}
 			const tx = new EthereumTx(txParams)
 			tx.sign(privateKey)
@@ -133,13 +130,6 @@ class Vote extends Component{
 					console.log(result);
 				}
 			});
-			/* this.state.web3.personal.importRawKey(this.state.privateKey, pwd);
-			if(this.state.web3.personal.unlockAccount(this.state.address, pwd)) {
-				this.smartVotingInstance.voteFor(candidateName, electionId, {gas: 1400000, from: this.state.address}
-				).then((tx) => {
-					console.log(tx);
-				})
-			}*/
 		})
 	}
 
@@ -167,7 +157,7 @@ class Vote extends Component{
 					delay={this.state.delay}
 					onError={this.handleError}
 					onScan={this.handleScan}
-					style={{width: '25%'}}
+					style={{width: '100%'}}
 				/>;
 			} else{
 				return <QrReader
@@ -175,7 +165,7 @@ class Vote extends Component{
 					delay={this.state.delay}
 					onError={this.handleError}
 					onScan={this.handleScan}
-					style={{width: '25%'}}
+					style={{width: '100%'}}
 					legacyMode
 				/>;
 			}
@@ -184,32 +174,42 @@ class Vote extends Component{
 		return(
 			<div className="App">
 				<nav className="navbar pure-menu pure-menu-horizontal">
-					<a href="#" className="pure-menu-heading pure-menu-link">eBloc Voting System</a>
+					<a href="/" className="pure-menu-heading pure-menu-link">eBloc Voting System</a>
 				</nav>
 
 				<main className="container">
-					<div style={{marginTop: '50px'}} className="row justify-content-md-center">
-						{this.renderQRReader()}
-					</div>
-					<p>Your private key is: {this.state.address}</p>
-					<p>{this.state.result}</p>
-					<div>
-					<FormGroup>
-						{this.state.candidates.map((c,index)=>(
-							<div className="radio">
-								<label>
-								<input type="radio" value={""+index} 
-								checked={this.state.selectedOption === (''+index)} 
-								onChange={this.handleOptionChange} />
-								{c.name}
-								</label>
+					<Grid>
+						<Col xs={1} sm={2} lg={4}/>
+						<Col xs={12} sm={8} lg={4}>
+							<div style={{marginTop: '50px'}}>
+								{this.renderQRReader()}
 							</div>
-							
-						))}
-						{this.state.isFirefox ? null : <Button bsStyle="primary" onClick={this.openImageDialog}>Submit QR Code</Button>}
-						<Button bsStyle="primary" onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
-					</FormGroup>
-					</div>
+							<div>
+							<FormGroup>
+								{this.state.candidates.map((c,index)=>(
+									<div>
+										<Col xs={14} sm={12} lg={14}>
+											<div className="radio">
+												<label>
+												<input type="radio" value={""+index} 
+												checked={this.state.selectedOption === (''+index)} 
+												onChange={this.handleOptionChange} />
+												{c.name}
+												</label>
+											</div>
+										</Col>
+									</div>
+								))}
+								<Row style={{margin: 0, paddingBottom: '20px', paddingTop: '20px'}}>
+									<ButtonToolbar>
+										{this.state.isFirefox ? null : <Button bsStyle="primary" onClick={this.openImageDialog}>Upload QR</Button>}
+										<Button bsStyle="primary" onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
+									</ButtonToolbar>
+								</Row>
+							</FormGroup>
+							</div>
+						</Col>
+					</Grid>
 				</main>
 			</div>
 		)
