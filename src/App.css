@@ -35,4 +35,8 @@ code {
   background-color: #4d96e6 !important;
 }
 
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
 
