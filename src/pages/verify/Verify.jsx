@@ -89,46 +89,38 @@ class Verify extends Component{
 		}
   }
 
-	handleSubmit() {
+	async handleSubmit() {
+		var electionId = await this.smartVotingInstance.getElectionId("0x"+this.state.address);
+		var isActive = await this.smartVotingInstance.isActive(electionId).then( (isActive) => isActive);
+		var isVoted = await this.smartVotingInstance.isVoted('0x' + this.state.address)
+			this.setState({
+				hasUserVoted: isVoted
+			})
+		if (isActive) {
+			this.setState({
+				isActive: true
+			})
+			console.log("The election is active");
+		}
+		else {
+			console.log("The election has ended");
+			// Get candidates vote count
+			var tempVotes = this.state.candidateVotes;
+			for (var i = 0; i < this.state.candidates.length; i++){
+				let voteCount = await this.smartVotingInstance.getVoteNumber(electionId, this.state.candidates[i].name)
+				.then(voteCount=>voteCount.toString(10));
+				tempVotes.push(voteCount)
+			}
+			this.setState({candidateVotes: tempVotes})
+		}
 		this.smartVotingInstance.getElectionId("0x"+this.state.address).then( (num) => {
 			console.log("Election id is: " + num);
 			this.smartVotingInstance.isActive(num).then( (isActive) => {
-				if (isActive) {
-					this.setState({
-						isActive: true
-					})
-					console.log("The election is active");
-					// Has user voted?
-					this.smartVotingInstance.isVoted('0x' + this.state.address).then( (voted) => {
-						this.setState({
-							hasUserVoted: voted
-						})
-					})
-				}
-
-				else {
-					console.log("The election has ended");
-					// Get candidates vote count
-					for (var i = 0; i < this.state.candidates.length; i++){
-						this.smartVotingInstance.getVoteNumber(num, this.state.candidates[i].name).then((voteCount) => {
-							var tempVotes = this.state.candidateVotes;
-							tempVotes.push(voteCount.toString(10));
-							this.setState({
-								candidateVotes: tempVotes
-							})
-						})
-					}
-					// Has user voted?
-					console.log("Has user voted?");
-					this.smartVotingInstance.isVoted('0x' + this.state.address).then( (voted) => {
-						this.setState({
-							hasUserVoted: voted
-						})
-						console.log(voted);
-					})					
-				}
+				
 			})
-			this.setState({ hasSubmit: true });
+			this.setState({ hasSubmit: true }, function(){
+				console.log(this.state);
+			});
 		})
 		console.log("Checked the Election");
 		console.log(this.state);
@@ -228,7 +220,7 @@ class Verify extends Component{
 										</Row>
 								)}
 										<Row>
-											<p> Your address is: {this.state.address} </p>
+											<p style={{fontSize: '3vw'}}> Your address is: {this.state.address} </p>
 										</Row>
 	
 								<Row style={{margin: 0, paddingBottom: '20px', paddingTop: '20px'}}>								
