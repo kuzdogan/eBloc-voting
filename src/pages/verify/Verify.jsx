@@ -167,6 +167,7 @@ class Verify extends Component{
 					onError={this.handleError}
 					onScan={this.handleScan}
 					style={{width: '100%'}}
+					legacyMode
 				/>;
 			}
   }
