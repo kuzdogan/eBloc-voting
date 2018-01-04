@@ -108,16 +108,20 @@ class Verify extends Component{
 
 				else {
 					console.log("The election has ended");
+					var promises = [];
 					// Get candidates vote count
 					for (var i = 0; i < this.state.candidates.length; i++){
-						this.smartVotingInstance.getVoteNumber(num, this.state.candidates[i].name).then((voteCount) => {
-							var tempVotes = this.state.candidateVotes;
-							tempVotes.push(voteCount.toString(10));
+						promises.push(this.smartVotingInstance.getVoteNumber(num, this.state.candidates[i].name));
+					}
+					Promise.all(promises).then((voteCount) => {
+							var tempVotes = voteCount.toString(10);
+							tempVotes = tempVotes.split(',');
 							this.setState({
 								candidateVotes: tempVotes
-							})
+							},function(){
+								console.log(this.state.candidateVotes);
+							});
 						})
-					}
 					// Has user voted?
 					console.log("Has user voted?");
 					this.smartVotingInstance.isVoted('0x' + this.state.address).then( (voted) => {
