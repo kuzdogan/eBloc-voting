@@ -241,7 +241,7 @@ class CreateVoting extends Component{
 				<Form>
 					<FormGroup>
 						<Row>
-							<Col md={4}>
+							<Col xs={12} sm={8} lg={4}>
 								<ControlLabel>Number of Voters</ControlLabel>
 								<FormControl
 									id="voter-count"
@@ -255,13 +255,13 @@ class CreateVoting extends Component{
 	        </FormGroup>
 	        <FormGroup>
 						<Row>
-							<Col md={4}>
+							<Col xs={12} sm={8} lg={4}>
 								<ControlLabel>Candidate names</ControlLabel>	
 							</Col>
 						</Row>
 						{this.state.candidates.map((candidate, idx) => (
 		          <Row className="candidate-input">
-		          	<Col md={4}>
+		          	<Col xs={10} sm={8} lg={4}>
 			            <FormControl
 			              type="text"
 			              placeholder={`Candidate #${idx + 1} Name`}
@@ -270,7 +270,7 @@ class CreateVoting extends Component{
 										style={{marginBottom: '10px'}}
 			            />
 			          </Col>
-			          <Col>
+			          <Col xs={2}>
 			            <Button bsStyle="danger" onClick={this.handleRemoveCandidate(idx)}>
 			            	<Glyphicon glyph="trash"/>
 		            	</Button>
@@ -281,12 +281,12 @@ class CreateVoting extends Component{
 		      </FormGroup>
 		      <FormGroup>
 		        <Row>
-							<Col md={4}>
+							<Col xs={12} sm={8} lg={4}>
 	        			<ControlLabel> Select starting date and time</ControlLabel>
 							</Col>
 						</Row>
 	        	<Row>      
-		        	<Col md={4} style={{marginBottom: '10px'}}>
+		        	<Col xs={12} sm={8} lg={4} style={{marginBottom: '10px'}}>
 								<Datetime 
 									defaultValue={new Date()}
 									onChange={this.handleStartDateChange}
@@ -296,12 +296,12 @@ class CreateVoting extends Component{
 		        	</Col>
 						</Row>
 		        <Row>
-							<Col md={4}>
+							<Col xs={12} sm={8} lg={4}>
 								<ControlLabel> Select end date and time</ControlLabel>
 							</Col>
 	        	</Row>
 	        	<Row>      
-		        	<Col md={4} style={{marginBottom: '10px'}}>
+		        	<Col xs={12} sm={8} lg={4} style={{marginBottom: '10px'}}>
 								<Datetime 
 									id="end-date"
 									defaultValue={new Date()}
