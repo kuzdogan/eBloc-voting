@@ -89,55 +89,43 @@ class Verify extends Component{
 		}
   }
 
-	handleSubmit() {
-		this.smartVotingInstance.getElectionId("0x"+this.state.address).then( (num) => {
-			console.log("Election id is: " + num);
-			this.smartVotingInstance.isActive(num).then( (isActive) => {
-				if (isActive) {
-					this.setState({
-						isActive: true
-					})
-					console.log("The election is active");
-					// Has user voted?
-					this.smartVotingInstance.isVoted('0x' + this.state.address).then( (voted) => {
-						this.setState({
-							hasUserVoted: voted
-						})
-					})
-				}
-
-				else {
-					console.log("The election has ended");
-					var promises = [];
-					// Get candidates vote count
-					for (var i = 0; i < this.state.candidates.length; i++){
-						promises.push(this.smartVotingInstance.getVoteNumber(num, this.state.candidates[i].name));
-					}
-					Promise.all(promises).then((voteCount) => {
-							var tempVotes = voteCount.toString(10);
-							tempVotes = tempVotes.split(',');
-							this.setState({
-								candidateVotes: tempVotes
-							},function(){
-								console.log(this.state.candidateVotes);
-							});
-						})
-					// Has user voted?
-					console.log("Has user voted?");
-					this.smartVotingInstance.isVoted('0x' + this.state.address).then( (voted) => {
-						this.setState({
-							hasUserVoted: voted
-						})
-						console.log(voted);
-					})					
-				}
-			})
-			this.setState({ hasSubmit: true });
-		})
-		console.log("Checked the Election");
-		console.log(this.state);
-	}
-
+async handleSubmit() {
+  var electionId = await this.smartVotingInstance.getElectionId("0x"+this.state.address);
+  var isActive = await this.smartVotingInstance.isActive(electionId).then( (isActive) => isActive);
+  var isVoted = await this.smartVotingInstance.isVoted('0x' + this.state.address)
+   this.setState({
+    hasUserVoted: isVoted
+   })
+  if (isActive) {
+   this.setState({
+    isActive: true
+   })
+   console.log("The election is active");
+  }
+  else {
+   console.log("The election has ended");
+   // Get candidates vote count
+   var tempVotes = this.state.candidateVotes;
+   for (var i = 0; i < this.state.candidates.length; i++){
+    let voteCount = await this.smartVotingInstance.getVoteNumber(electionId, this.state.candidates[i].name)
+    .then(voteCount=>voteCount.toString(10));
+    tempVotes.push(voteCount)
+   }
+   this.setState({candidateVotes: tempVotes})
+  }
+  this.smartVotingInstance.getElectionId("0x"+this.state.address).then( (num) => {
+   console.log("Election id is: " + num);
+   this.smartVotingInstance.isActive(num).then( (isActive) => {
+    
+   })
+   this.setState({ hasSubmit: true }, function(){
+    console.log(this.state);
+   });
+  })
+  console.log("Checked the Election");
+  console.log(this.state);
+ }
+ 
 	handleScan(data){
 		if(data){
 			const result = JSON.parse(data);
