@@ -3,7 +3,7 @@ import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import QrReader from 'react-qr-reader'
 import util	from 'ethereumjs-util'	
-import { FormGroup, Jumbotron, Radio, Navbar, Nav, MenuItem, Button, Row } from 'react-bootstrap'	
+import { Grid, Col, ButtonToolbar, FormGroup, Jumbotron, Radio, Navbar, Nav, MenuItem, Button, Row } from 'react-bootstrap'	
 const loadash = require('lodash');
 const SolidityFunction = require('web3/lib/web3/function');
 const EthereumTx = require('ethereumjs-tx')
@@ -27,6 +27,7 @@ class Verify extends Component{
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.instantiateContract = this.instantiateContract.bind(this);
 		this.mygetaddr = this.mygetaddr.bind(this);
+		this.openImageDialog = this.openImageDialog.bind(this);		
 	}
 
 
@@ -157,7 +158,7 @@ class Verify extends Component{
 					delay={this.state.delay}
 					onError={this.handleError}
 					onScan={this.handleScan}
-					style={{width: '25%'}}
+					style={{width: '100%'}}
 				/>;
 			} else{
 				return <QrReader
@@ -165,8 +166,7 @@ class Verify extends Component{
 					delay={this.state.delay}
 					onError={this.handleError}
 					onScan={this.handleScan}
-					style={{width: '25%'}}
-					legacyMode
+					style={{width: '100%'}}
 				/>;
 			}
   }
@@ -191,43 +191,55 @@ class Verify extends Component{
 				  </div>
 			  </Navbar>
 
-				<h1>Here You Can Verify Your Votes and See Election Results</h1>
 				<main className="container">
-					<h2> Scan or Upload your QR Code </h2>
-					<div style={{marginTop: '50px'}} className="row justify-content-md-center">
-						{this.renderQRReader()}
-					</div>
-					<div>
-					{ this.state.hasSubmit && (
-							this.state.isActive ? (
-									<p> This election is currently active. Please check for results after the deadline passes. </p>
-								) :
-								( <p> This election has ended. Please check the results below </p>)
-						)
-					}
-					<FormGroup>
-						{this.state.hasSubmit && 
-							(this.state.candidates.map((c,index)=>(
+					<Grid>
+						<Col xs={1} sm={2} lg={4}/>
+						<Col xs={12} sm={8} lg={4}>
+							<div style={{marginTop: '50px'}}>
+								{this.renderQRReader()}
+							</div>
+							<div>
+							{ this.state.hasSubmit && (
+									this.state.isActive ? (
+											<p> This election is currently active. Please check for results after the deadline passes. </p>
+										) :
+										( <p> This election has ended. Please check the results below </p>)
+								)
+							}
+							<FormGroup>
+								{this.state.hasSubmit && 
+									(this.state.candidates.map((c,index)=>(
 
-							<div className="vote-results">
-								<Row>
-									<p> {c.name}: {this.state.candidateVotes[index]} </p>
+									<div className="vote-results">
+										<Row>
+											<p> {c.name}: {this.state.candidateVotes[index]} </p>
+										</Row>
+									</div>
+									
+									))
+									)
+								}
+								{this.state.hasSubmit && (
+										<Row>
+											<p> Have you voted: {this.state.hasUserVoted ? 
+												(<i className="fa fa-check" aria-hidden="true" style={{color: '#449D44', fontSize: '18px'}}></i>)
+											: (<i className="fa fa-times" aria-hidden="true" style={{color: '#C9302C', fontSize: '18px'}}></i>)} </p>
+										</Row>
+								)}
+										<Row>
+											<p> Your address is: {this.state.address} </p>
+										</Row>
+	
+								<Row style={{margin: 0, paddingBottom: '20px', paddingTop: '20px'}}>								
+									<ButtonToolbar>
+										{this.state.isFirefox ? null : <Button bsStyle="primary" onClick={this.openImageDialog}>Upload QR</Button>}
+										<Button bsStyle={this.state.candidates.length === 0 ? "primary" : "success"} onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
+									</ButtonToolbar>
 								</Row>
+							</FormGroup>
 							</div>
-							
-							))
-							)
-						}
-						{this.state.hasSubmit && (
-							<div className="msg">
-								<p> Have you voted: {this.state.hasUserVoted ? "yes" : "no"} </p>
-								<p> Your address is: {this.state.address} </p>
-							</div>
-						)}
-						{this.state.isFirefox ? null : <Button bsStyle="primary" onClick={this.openImageDialog}>Submit QR Code</Button>}
-						<Button bsStyle="primary" onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
-					</FormGroup>
-					</div>
+						</Col>
+					</Grid>
 				</main>
 			</div>
 		)

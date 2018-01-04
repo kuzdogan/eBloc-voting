@@ -311,7 +311,7 @@ class CreateVoting extends Component{
 								/>
 		        	</Col>
 						</Row>
-						<Button bsStyle="primary" onClick={this.generateKeys}>
+						<Button bsStyle="success" onClick={this.generateKeys}>
 						Create a voting
 						</Button>
 					</FormGroup>
