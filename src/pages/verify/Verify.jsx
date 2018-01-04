@@ -3,7 +3,7 @@ import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import QrReader from 'react-qr-reader'
 import util	from 'ethereumjs-util'	
-import { FormGroup, Jumbotron, Radio, Navbar, Nav, NavItem, Button, Row } from 'react-bootstrap'	
+import { FormGroup, Jumbotron, Radio, Navbar, Nav, MenuItem, Button, Row } from 'react-bootstrap'	
 const loadash = require('lodash');
 const SolidityFunction = require('web3/lib/web3/function');
 const EthereumTx = require('ethereumjs-tx')
@@ -183,9 +183,9 @@ class Verify extends Component{
 				    </Navbar.Header>
 				    <Navbar.Collapse>
 				      <Nav>
-				        <NavItem eventKey={1} href="/create">Create Voting</NavItem>
-				        <NavItem eventKey={2} href="/vote">Cast Vote</NavItem>
-				        <NavItem eventKey={2} href="/verify">Verify Election</NavItem>
+				        <MenuItem href="/create">Create Voting</MenuItem>
+				        <MenuItem href="/vote">Cast Vote</MenuItem>
+				        <MenuItem href="/verify">Verify Election</MenuItem>
 				      </Nav>
 				    </Navbar.Collapse>
 				  </div>

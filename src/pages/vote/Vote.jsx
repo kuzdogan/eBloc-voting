@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import QrReader from 'react-qr-reader'
-import {Navbar, Nav, NavItem, FormGroup, Jumbotron, Radio, Button } from 'react-bootstrap'
+import {Navbar, Nav, MenuItem, FormGroup, Jumbotron, Radio, Button, Grid, Col, Row, ButtonToolbar } from 'react-bootstrap'
 import util	from 'ethereumjs-util'
 const loadash = require('lodash');
 const SolidityFunction = require('web3/lib/web3/function');
@@ -183,9 +183,9 @@ class Vote extends Component{
 				    </Navbar.Header>
 				    <Navbar.Collapse>
 				      <Nav>
-				        <NavItem eventKey={1} href="/create">Create Voting</NavItem>
-				        <NavItem eventKey={2} href="/vote">Cast Vote</NavItem>
-				        <NavItem eventKey={2} href="/verify">Verify Election</NavItem>
+				        <MenuItem eventKey={1} href="/create">Create Voting</MenuItem>
+				        <MenuItem eventKey={2} href="/vote">Cast Vote</MenuItem>
+				        <MenuItem eventKey={2} href="/verify">Verify Election</MenuItem>
 				      </Nav>
 				    </Navbar.Collapse>
 				  </div>
