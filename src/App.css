@@ -19,49 +19,20 @@ code {
 .container {
   box-sizing: border-box;
   width: 100%;
-  padding: 20px 20px 45px 20px;
-}
-
-.pure-button-primary {
-  background-color: #0c1a2b;
-}
-
-.pure-button-primary:hover {
-  background-color: #233e5e;
-}
-
-.pure-form input[type="text"]:focus {
-  border-color: #0c1a2b;
 }
 
 /* NAVBAR */
 
 .navbar {
-  padding: 5px;
-  background: #337ab7;
+  background: #3e79ba;
   font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  color: white;
+}
+.navbar a{
+  color: white !important;
+}
+.navbar a:hover{
+  background-color: #4d96e6 !important;
 }
 
-.navbar a {
-  color: #fff;
-}
 
-.navbar a:active,
-.navbar a:focus,
-.navbar a:hover {
-  background: #233e5e;
-}
-
-.navbar .pure-menu-heading {
-  font-weight: bold;
-  text-transform: none;
-}
-
-.navbar .navbar-right {
-  float: right;
-}
-
-.navbar .uport-logo {
-  height: 16px;
-  margin-right: 10px;
-}

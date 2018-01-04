@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Button, Form, FormGroup, FormControl, ControlLabel, Glyphicon, Grid, Row, Col} from 'react-bootstrap'
+import {Navbar, Nav, NavItem, Button, Form, FormGroup, FormControl, ControlLabel, Glyphicon, Grid, Row, Col} from 'react-bootstrap'
 import SmartVotingContract from '../../../build/contracts/SmartVoting.json'
 import getWeb3 from '../../utils/getWeb3'
 import Datetime from 'react-datetime'
@@ -220,9 +220,23 @@ class CreateVoting extends Component{
 	render(){
 		return(
 		<div className="page">
-			<nav className="navbar pure-menu pure-menu-horizontal">
-					<a href="/" className="pure-menu-heading pure-menu-link">Smart Voting</a>
-			</nav>
+			 <Navbar inverse collapseOnSelect>
+			 	<div className="navbar-container">
+			    <Navbar.Header>
+			      <Navbar.Brand>
+			        <a href="/">eBloc Voting</a>
+			      </Navbar.Brand>
+			      <Navbar.Toggle />
+			    </Navbar.Header>
+			    <Navbar.Collapse>
+			      <Nav>
+			        <NavItem eventKey={1} href="/create">Create Voting</NavItem>
+			        <NavItem eventKey={2} href="/vote">Cast Vote</NavItem>
+			        <NavItem eventKey={2} href="/verify">Verify Election</NavItem>
+			      </Nav>
+			    </Navbar.Collapse>
+			  </div>
+		  </Navbar>
 			<Grid>
 				<Form>
 					<FormGroup>
