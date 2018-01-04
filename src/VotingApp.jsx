@@ -1,5 +1,5 @@
-import React, {Navbar, Nav, MenuItem, Component } from 'react'
-import {Button} from 'react-bootstrap'
+import React, { Component } from 'react'
+import {Navbar, Nav, MenuItem, Button} from 'react-bootstrap'
 
 class VotingApp extends Component {
   constructor(props){
