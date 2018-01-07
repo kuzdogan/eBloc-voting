@@ -97,10 +97,14 @@ class Vote extends Component{
   }
 
 	handleSubmit() {
+		// Generate a raw transaction, sign it and send it
 		console.log(this.state.privateKey, this.state.address);
+		// Get election id
 		this.smartVotingInstance.getElectionId("0x"+this.state.address).then( (num) => {
+			// Extract candidate name from the radio selection
 			const candidateName = this.state.candidates[Number(this.state.selectedOption)].name;
 			const electionId = Number(num.toString());
+			
 			var ABI = SmartVotingContract.abi;
 			var functionDef = new SolidityFunction('', loadash.find(ABI, { name: 'voteFor' }), '');
 			var payloadData = functionDef.toPayload([candidateName,electionId]).data;
@@ -151,6 +155,7 @@ class Vote extends Component{
     this.refs.qrReader.openImageDialog()
   }
   renderQRReader(){
+  	// As Chrome based browsers do not let camera usage over HTTP we set QR Reader mode properly
   	if(this.state.isFirefox) {
   		return	<QrReader
 					ref="qrReader"
@@ -159,7 +164,7 @@ class Vote extends Component{
 					onScan={this.handleScan}
 					style={{width: '100%'}}
 				/>;
-			} else{
+			} else{ // Use legacy mode if not Firefox: Make users upload images
 				return <QrReader
 					ref="qrReader"
 					delay={this.state.delay}
@@ -217,7 +222,7 @@ class Vote extends Component{
 								<Row style={{margin: 0, paddingBottom: '20px', paddingTop: '20px'}}>
 									<ButtonToolbar>
 										{this.state.isFirefox ? null : <Button bsStyle="primary" onClick={this.openImageDialog}>Upload QR</Button>}
-										<Button bsStyle="primary" onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
+										<Button bsStyle={this.state.candidates.length === 0 ? "primary" : "success"} onClick={this.handleSubmit} disabled={this.state.candidates.length === 0}>Submit</Button>
 									</ButtonToolbar>
 								</Row>
 							</FormGroup>

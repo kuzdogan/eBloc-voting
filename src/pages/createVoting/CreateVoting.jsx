@@ -56,12 +56,13 @@ class CreateVoting extends Component{
 	    const smartVoting = contract(SmartVotingContract)
 	    smartVoting.setProvider(this.state.web3.currentProvider)
 
-	    // Declaring this for later so we can chain functions on SimpleStorage.
-
+	    // If the contract is deployed creat an instance.
+	    // Must deploy the contract beforehand.
 	    smartVoting.deployed().then(instance => {
 	    	this.smartVotingInstance = instance;
 	    	return this.smartVotingInstance.numberOfElections()
-	    }).then(numElections => { // Arrow function for using "this"
+	    }).then(numElections => { // Arrow function for using "this" other formats leaves this our of scope
+	    	// Print the nubmer of elections (election id) for debugging purposes
 	    	console.log("Number of elections so far is: " + numElections);
 	    })
 
@@ -321,9 +322,12 @@ class CreateVoting extends Component{
 		)
 	}
 }
+
+// Function to extract the public key from privatekey in string format
 function mygetaddr(prikey) {	
 	var privatekey = new	Buffer(prikey,	'hex')	;	
 	var publickey =	util.privateToPublic(privatekey)	
 	return(util.publicToAddress(publickey).toString('hex'))	;		
 }
+
 export default CreateVoting

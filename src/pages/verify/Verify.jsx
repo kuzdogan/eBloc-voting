@@ -30,7 +30,7 @@ class Verify extends Component{
 		this.openImageDialog = this.openImageDialog.bind(this);		
 	}
 
-
+	// Extracts the public key from the private key as a string
 	mygetaddr(prikey) {	
 		var privatekey = new	Buffer(prikey,	'hex')	;	
 		var publickey =	util.privateToPublic(privatekey)	
@@ -104,6 +104,7 @@ class Verify extends Component{
 		else {
 			console.log("The election has ended");
 			// Get candidates vote count
+			// Use sync calls not to lose the order of candidate votes array
 			var tempVotes = this.state.candidateVotes;
 			for (var i = 0; i < this.state.candidates.length; i++){
 				let voteCount = await this.smartVotingInstance.getVoteNumber(electionId, this.state.candidates[i].name)
@@ -219,7 +220,7 @@ class Verify extends Component{
 										</Row>
 								)}
 										<Row>
-											<p style={{fontSize: '3vw'}}> Your address is: {this.state.address} </p>
+											<p> Your address is: {this.state.address} </p>
 										</Row>
 	
 								<Row style={{margin: 0, paddingBottom: '20px', paddingTop: '20px'}}>								
