@@ -3,6 +3,12 @@ An Ethereum based voting app for small scale elections
 
 Based on [truffle/react-box](https://github.com/truffle-box/react-box) boilerplate code
 
+See the demo video [here](https://www.youtube.com/watch?v=yxlFhs991U8)
+
+Read the full project report [here](https://drive.google.com/open?id=1CMbabqKH2M28DD5l4BbtBRgLWB-77_i4)
+
+Find detailed instructions in the project report. More documentation to be added soon.
+
 ## Instructions
 1. Install npm if you haven't following the instructions [here](https://docs.npmjs.com/getting-started/installing-node)
 
