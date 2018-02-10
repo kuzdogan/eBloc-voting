@@ -1,5 +1,5 @@
 # solidity-voting
-An Ethereum based voting app for small scale elections. Nominated 1st prize as Boğaziçi University 2017 Fall [Senior Project](https://github.com/kuzdogan/eBloc-voting).
+An Ethereum based voting app for small scale elections. Nominated 1st prize as Boğaziçi University 2017 Fall [Senior Project](https://www.cmpe.boun.edu.tr/content/ebloc-blockchain-voting).
 
 Based on [truffle/react-box](https://github.com/truffle-box/react-box) boilerplate code
 
