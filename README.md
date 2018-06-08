@@ -32,11 +32,14 @@ Find detailed instructions in the project report. More documentation to be added
     ```
     ganache-cli -p 9545     
     ````
-6. Compile and migrate the smart contracts. Note inside the development console we don't preface commands with `truffle`.
+6. Open a new terminal in the folder. Compile and migrate the smart contracts.
     ```javascript
-    compile
-    migrate
+    truffle compile
     ````
+    and then
+    ```
+    truffle migrate --network development
+    ```
 7. Before running copy the contract addres from test network console output and paste to src/pages/vote/Vote.jsx file line 120. Contract address is currently hard coded.
 
 8. Run the webpack server
