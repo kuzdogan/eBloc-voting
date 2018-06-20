@@ -7,6 +7,8 @@ Nominated 1st prize as Boğaziçi University 2017 Fall [Senior Project](https://
 
 Based on [truffle/react-box](https://github.com/truffle-box/react-box) boilerplate code
 
+Take a look at our [poster](https://drive.google.com/open?id=1UAH2OC2lb42Po0xRXN3Qj3AfDzOtAezJ)
+
 See the demo video [here](https://www.youtube.com/watch?v=yxlFhs991U8)
 
 Read the full project report [here](https://drive.google.com/open?id=1CMbabqKH2M28DD5l4BbtBRgLWB-77_i4)
